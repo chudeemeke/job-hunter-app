@@ -2,9 +2,9 @@
 const CACHE_VERSION = 'v3';
 const CACHE_NAME = `job-hunter-${CACHE_VERSION}`;
 const urlsToCache = [
-    '/',
-    '/index.html',
-    '/manifest.json'
+    '/job-hunter-app/',
+    '/job-hunter-app/index.html',
+    '/job-hunter-app/manifest.json'
 ];
 
 // Install event - cache assets
@@ -63,7 +63,7 @@ self.addEventListener('fetch', event => {
                 })
                 .catch(() => {
                     // Fallback to cache when offline
-                    return caches.match(request) || caches.match('/index.html');
+                    return caches.match(request) || caches.match('/job-hunter-app/index.html');
                 })
         );
         return;
@@ -93,7 +93,7 @@ self.addEventListener('fetch', event => {
             })
             .catch(() => {
                 // Offline fallback
-                return caches.match('/index.html');
+                return caches.match('/job-hunter-app/index.html');
             })
     );
 });
@@ -160,7 +160,7 @@ self.addEventListener('notificationclick', event => {
 
     if (event.action === 'view') {
         event.waitUntil(
-            clients.openWindow('/')
+            clients.openWindow('/job-hunter-app/')
         );
     }
 });
