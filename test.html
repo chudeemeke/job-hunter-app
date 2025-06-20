@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JobBoardPWA - Quick Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        button {
+            padding: 10px 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+    <h1>JobBoardPWA Test Page</h1>
+    <p>This page tests if all components are loading correctly.</p>
+    
+    <div id="results"></div>
+    
+    <h2>Quick Actions:</h2>
+    <button onclick="testApp()">Test App Loading</button>
+    <button onclick="testServiceWorker()">Test Service Worker</button>
+    <button onclick="testIcons()">Test Icons</button>
+    <button onclick="window.location.href='index.html'">Launch App</button>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        function addResult(message, type = 'success') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = message;
+            results.appendChild(div);
+        }
+        
+        // Test app loading
+        async function testApp() {
+            results.innerHTML = '';
+            
+            try {
+                // Test if app.js loads
+                const appModule = await import('./src/js/app.js');
+                if (appModule.app) {
+                    addResult('✓ App module loaded successfully');
+                } else {
+                    addResult('✗ App module loaded but app not initialized', 'error');
+                }
+            } catch (error) {
+                addResult(`✗ Failed to load app: ${error.message}`, 'error');
+            }
+            
+            // Test database
+            if (typeof Dexie !== 'undefined') {
+                addResult('✓ Dexie database available');
+            } else {
+                addResult('⚠ Dexie not loaded - include script in index.html', 'warning');
+            }
+        }
+        
+        // Test service worker
+        function testServiceWorker() {
+            results.innerHTML = '';
+            
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        addResult('✓ Service Worker registered');
+                        
+                        if (registration.active) {
+                            addResult('✓ Service Worker is active');
+                        } else {
+                            addResult('⚠ Service Worker registered but not active yet', 'warning');
+                        }
+                    })
+                    .catch(error => {
+                        addResult(`✗ Service Worker registration failed: ${error.message}`, 'error');
+                    });
+            } else {
+                addResult('✗ Service Workers not supported in this browser', 'error');
+            }
+        }
+        
+        // Test icons
+        function testIcons() {
+            results.innerHTML = '';
+            
+            const icons = ['icon-192.png', 'icon-512.png'];
+            
+            icons.forEach(icon => {
+                const img = new Image();
+                img.onload = () => {
+                    addResult(`✓ ${icon} exists and loads`);
+                };
+                img.onerror = () => {
+                    addResult(`✗ ${icon} not found - generate using generate-icons.html`, 'error');
+                };
+                img.src = icon;
+            });
+            
+            // Test manifest
+            fetch('/manifest.json')
+                .then(response => response.json())
+                .then(manifest => {
+                    addResult('✓ Manifest.json loads correctly');
+                    
+                    if (manifest.name && manifest.short_name && manifest.icons) {
+                        addResult('✓ Manifest has required PWA fields');
+                    } else {
+                        addResult('⚠ Manifest missing some PWA fields', 'warning');
+                    }
+                })
+                .catch(error => {
+                    addResult(`✗ Failed to load manifest: ${error.message}`, 'error');
+                });
+        }
+        
+        // Auto-run basic test
+        window.onload = () => {
+            addResult('Page loaded successfully');
+            
+            // Check HTTPS
+            if (location.protocol === 'https:' || location.hostname === 'localhost') {
+                addResult('✓ Running on HTTPS or localhost (PWA compatible)');
+            } else {
+                addResult('⚠ Not running on HTTPS - PWA features may not work', 'warning');
+            }
+        };
+    </script>
+</body>
+</html>

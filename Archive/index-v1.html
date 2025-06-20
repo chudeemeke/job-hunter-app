@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Hunter PWA - Application Tracker & Resume Optimizer</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2563eb">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gray-100);
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+        
+        .app-header {
+            background: white;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+        
+        .sync-indicator {
+            width: 8px;
+            height: 8px;
+            background: var(--secondary);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .tabs {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow-x: auto;
+        }
+        
+        .tab {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .tab:hover {
+            background: var(--gray-100);
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .tab-content {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+            transition: box-shadow 0.3s;
+        }
+        
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .job-card {
+            display: grid;
+            gap: 0.75rem;
+        }
+        
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+        
+        .job-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.25rem;
+        }
+        
+        .company-name {
+            color: var(--gray-600);
+            font-size: 1rem;
+        }
+        
+        .job-meta {
+            display: flex;
+            gap: 1rem;
+            color: var(--gray-600);
+            font-size: 0.875rem;
+        }
+        
+        .job-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-800);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--gray-300);
+        }
+        
+        .search-container {
+            margin-bottom: 1.5rem;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .filter-chips {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            flex-wrap: wrap;
+        }
+        
+        .chip {
+            padding: 0.25rem 0.75rem;
+            background: var(--gray-200);
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .chip.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            margin: 2rem;
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--gray-800);
+        }
+        
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        
+        .form-textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-applied { background: #dbeafe; color: #1e40af; }
+        .status-interview { background: #fef3c7; color: #92400e; }
+        .status-offer { background: #d1fae5; color: #065f46; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+        
+        .settings-section {
+            margin-bottom: 2rem;
+        }
+        
+        .settings-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .resume-preview {
+            background: var(--gray-100);
+            border: 1px solid var(--gray-300);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 0.875rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid var(--gray-300);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray-600);
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        @media (max-width: 768px) {
+            .job-header {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .job-actions {
+                flex-wrap: wrap;
+            }
+            
+            .modal-content {
+                margin: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-content">
+            <h1 class="app-title">Job Hunter</h1>
+            <div class="sync-status">
+                <span class="sync-indicator"></span>
+                <span>Auto-saving</span>
+            </div>
+        </div>
+    </header>
+    
+    <nav class="tabs">
+        <div class="tab active" data-tab="jobs">Job Board</div>
+        <div class="tab" data-tab="applications">Applications</div>
+        <div class="tab" data-tab="resume">Resume Optimizer</div>
+        <div class="tab" data-tab="settings">Settings</div>
+    </nav>
+    
+    <!-- Job Board Tab -->
+    <div id="jobs" class="tab-content active">
+        <div class="search-container">
+            <input type="text" class="search-box" placeholder="Search jobs by title, company, or keywords...">
+            <div class="filter-chips">
+                <span class="chip active" data-filter="all">All Jobs</span>
+                <span class="chip" data-filter="remote">Remote</span>
+                <span class="chip" data-filter="fulltime">Full-time</span>
+                <span class="chip" data-filter="senior">Senior</span>
+                <span class="chip" data-filter="junior">Junior</span>
+            </div>
+        </div>
+        
+        <div id="jobList">
+            <!-- Jobs will be populated here -->
+        </div>
+    </div>
+    
+    <!-- Applications Tab -->
+    <div id="applications" class="tab-content">
+        <div class="filter-chips">
+            <span class="chip active" data-status="all">All</span>
+            <span class="chip" data-status="applied">Applied</span>
+            <span class="chip" data-status="interview">Interview</span>
+            <span class="chip" data-status="offer">Offer</span>
+            <span class="chip" data-status="rejected">Rejected</span>
+        </div>
+        
+        <div id="applicationsList" style="margin-top: 1.5rem;">
+            <!-- Applications will be populated here -->
+        </div>
+    </div>
+    
+    <!-- Resume Optimizer Tab -->
+    <div id="resume" class="tab-content">
+        <div class="card">
+            <h2 class="settings-title">Resume Optimizer</h2>
+            <p style="margin-bottom: 1rem;">Select a job from the job board to optimize your resume for that position.</p>
+            
+            <div class="form-group">
+                <label class="form-label">Selected Job</label>
+                <div id="selectedJobInfo" class="empty-state">
+                    <div class="empty-state-icon">📄</div>
+                    <p>No job selected. Go to the Job Board and click "Optimize Resume" on any job.</p>
+                </div>
+            </div>
+            
+            <div id="resumeOptimizer" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">Base Resume</label>
+                    <textarea class="form-textarea" id="baseResume" placeholder="Paste your base resume here..."></textarea>
+                </div>
+                
+                <button class="btn btn-primary" onclick="optimizeResume()">
+                    <span id="optimizeBtn">🎯 Optimize Resume</span>
+                </button>
+                
+                <div id="optimizedResume" style="display: none;">
+                    <h3 style="margin: 1.5rem 0 1rem;">Optimized Resume</h3>
+                    <div class="resume-preview" id="resumePreview"></div>
+                    
+                    <h3 style="margin: 1.5rem 0 1rem;">Generated Cover Letter</h3>
+                    <div class="resume-preview" id="coverLetterPreview"></div>
+                    
+                    <div class="job-actions" style="margin-top: 1rem;">
+                        <button class="btn btn-primary" onclick="sendApplication()">
+                            📧 Send Application
+                        </button>
+                        <button class="btn btn-secondary" onclick="downloadResume()">
+                            💾 Download Resume
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Tab -->
+    <div id="settings" class="tab-content">
+        <div class="settings-section">
+            <h2 class="settings-title">Email Configuration</h2>
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-input" id="emailAddress" placeholder="your.email@example.com">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email Template</label>
+                <textarea class="form-textarea" id="emailTemplate" placeholder="Dear Hiring Manager,&#10;&#10;I am writing to express my interest in the {position} role at {company}..."></textarea>
+            </div>
+        </div>
+        
+        <div class="settings-section">
+            <h2 class="settings-title">Job Sources</h2>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" checked> LinkedIn Jobs
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" checked> Indeed
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" checked> AngelList
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox"> Remote.co
+                </label>
+            </div>
+        </div>
+        
+        <button class="btn btn-primary" onclick="saveSettings()">
+            💾 Save Settings
+        </button>
+    </div>
+    
+    <!-- Application Modal -->
+    <div id="applicationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Apply to Position</h2>
+                <button class="btn btn-secondary" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="applicationForm">
+                    <div class="form-group">
+                        <label class="form-label">Cover Letter</label>
+                        <textarea class="form-textarea" id="coverLetter" placeholder="Your cover letter..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Additional Notes</label>
+                        <textarea class="form-textarea" id="applicationNotes" placeholder="Any additional notes about this application..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        📤 Submit Application
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(reg => {
+                console.log('Service Worker registered');
+            }).catch(err => {
+                console.log('Service Worker registration failed');
+            });
+        }
+        
+        // App State
+        const appState = {
+            jobs: [],
+            applications: [],
+            selectedJob: null,
+            settings: {
+                email: '',
+                emailTemplate: '',
+                sources: {
+                    linkedin: true,
+                    indeed: true,
+                    angellist: true,
+                    remote: false
+                }
+            }
+        };
+        
+        // Load data from localStorage
+        function loadState() {
+            const saved = localStorage.getItem('jobHunterState');
+            if (saved) {
+                Object.assign(appState, JSON.parse(saved));
+                updateUI();
+            }
+        }
+        
+        // Save state to localStorage
+        function saveState() {
+            localStorage.setItem('jobHunterState', JSON.stringify(appState));
+        }
+        
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        
+        // Sample job data (in real app, this would come from API)
+        const sampleJobs = [
+            {
+                id: 1,
+                title: 'Senior Frontend Developer',
+                company: 'Tech Corp',
+                location: 'Remote',
+                type: 'Full-time',
+                salary: '$120k - $150k',
+                posted: '2 days ago',
+                description: 'Looking for experienced React developer...',
+                requirements: ['React', 'TypeScript', 'Node.js', '5+ years experience']
+            },
+            {
+                id: 2,
+                title: 'Full Stack Engineer',
+                company: 'StartupXYZ',
+                location: 'San Francisco, CA',
+                type: 'Full-time',
+                salary: '$100k - $140k',
+                posted: '1 week ago',
+                description: 'Join our growing team...',
+                requirements: ['Python', 'Django', 'React', 'PostgreSQL']
+            },
+            {
+                id: 3,
+                title: 'Junior Web Developer',
+                company: 'Digital Agency',
+                location: 'New York, NY',
+                type: 'Full-time',
+                salary: '$60k - $80k',
+                posted: '3 days ago',
+                description: 'Great opportunity for growth...',
+                requirements: ['HTML/CSS', 'JavaScript', 'WordPress']
+            }
+        ];
+        
+        // Initialize jobs
+        function initializeJobs() {
+            if (appState.jobs.length === 0) {
+                appState.jobs = sampleJobs;
+                saveState();
+            }
+            renderJobs();
+        }
+        
+        // Render job listings
+        function renderJobs() {
+            const jobList = document.getElementById('jobList');
+            const jobs = appState.jobs;
+            
+            if (jobs.length === 0) {
+                jobList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <p>No jobs found. Try adjusting your filters.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            jobList.innerHTML = jobs.map(job => `
+                <div class="card job-card">
+                    <div class="job-header">
+                        <div>
+                            <h3 class="job-title">${job.title}</h3>
+                            <p class="company-name">${job.company}</p>
+                            <div class="job-meta">
+                                <span>📍 ${job.location}</span>
+                                <span>💼 ${job.type}</span>
+                                <span>💰 ${job.salary}</span>
+                                <span>🕒 ${job.posted}</span>
+                            </div>
+                        </div>
+                        ${getApplicationStatus(job.id)}
+                    </div>
+                    <div class="job-actions">
+                        <button class="btn btn-primary" onclick="applyToJob(${job.id})">
+                            📤 Quick Apply
+                        </button>
+                        <button class="btn btn-secondary" onclick="selectJobForResume(${job.id})">
+                            🎯 Optimize Resume
+                        </button>
+                        <button class="btn btn-secondary" onclick="saveJob(${job.id})">
+                            💾 Save
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Get application status for a job
+        function getApplicationStatus(jobId) {
+            const app = appState.applications.find(a => a.jobId === jobId);
+            if (!app) return '';
+            
+            return `<span class="status-badge status-${app.status}">${app.status}</span>`;
+        }
+        
+        // Apply to job
+        function applyToJob(jobId) {
+            const job = appState.jobs.find(j => j.id === jobId);
+            appState.selectedJob = job;
+            
+            // Pre-fill cover letter
+            const coverLetter = generateCoverLetter(job);
+            document.getElementById('coverLetter').value = coverLetter;
+            
+            document.getElementById('applicationModal').classList.add('active');
+        }
+        
+        // Generate cover letter
+        function generateCoverLetter(job) {
+            const template = appState.settings.emailTemplate || `Dear Hiring Manager,
+
+I am writing to express my strong interest in the {position} position at {company}. With my background in software development and expertise in the required technologies, I am confident I would be a valuable addition to your team.
+
+[Your relevant experience and skills]
+
+I am particularly excited about this opportunity because [specific reason related to the company/role].
+
+Thank you for considering my application. I look forward to the opportunity to discuss how I can contribute to {company}'s continued success.
+
+Best regards,
+[Your name]`;
+            
+            return template
+                .replace(/{position}/g, job.title)
+                .replace(/{company}/g, job.company);
+        }
+        
+        // Select job for resume optimization
+        function selectJobForResume(jobId) {
+            const job = appState.jobs.find(j => j.id === jobId);
+            appState.selectedJob = job;
+            
+            // Switch to resume tab
+            document.querySelector('[data-tab="resume"]').click();
+            
+            // Update selected job info
+            document.getElementById('selectedJobInfo').innerHTML = `
+                <div class="card">
+                    <h4>${job.title}</h4>
+                    <p>${job.company} - ${job.location}</p>
+                    <p><strong>Requirements:</strong> ${job.requirements.join(', ')}</p>
+                </div>
+            `;
+            
+            document.getElementById('resumeOptimizer').style.display = 'block';
+        }
+        
+        // Optimize resume
+        function optimizeResume() {
+            const baseResume = document.getElementById('baseResume').value;
+            if (!baseResume) {
+                alert('Please enter your base resume first');
+                return;
+            }
+            
+            const job = appState.selectedJob;
+            const optimizeBtn = document.getElementById('optimizeBtn');
+            optimizeBtn.innerHTML = '<span class="loading"></span> Optimizing...';
+            
+            // Simulate optimization process
+            setTimeout(() => {
+                const optimized = optimizeResumeForJob(baseResume, job);
+                const coverLetter = generateCoverLetter(job);
+                
+                document.getElementById('resumePreview').textContent = optimized;
+                document.getElementById('coverLetterPreview').textContent = coverLetter;
+                document.getElementById('optimizedResume').style.display = 'block';
+                
+                optimizeBtn.innerHTML = '🎯 Optimize Resume';
+            }, 2000);
+        }
+        
+        // Resume optimization logic
+        function optimizeResumeForJob(resume, job) {
+            // Simple keyword injection for demo
+            let optimized = resume;
+            
+            // Add job-specific keywords
+            const keywords = job.requirements;
+            const keywordSection = `\n\nKEY SKILLS:\n${keywords.join(' • ')}\n`;
+            
+            // Insert after first paragraph
+            const firstNewline = optimized.indexOf('\n\n');
+            if (firstNewline > -1) {
+                optimized = optimized.slice(0, firstNewline) + keywordSection + optimized.slice(firstNewline);
+            }
+            
+            // Highlight relevant experience
+            keywords.forEach(keyword => {
+                const regex = new RegExp(`(${keyword})`, 'gi');
+                optimized = optimized.replace(regex, '**$1**');
+            });
+            
+            return optimized;
+        }
+        
+        // Send application
+        function sendApplication() {
+            const email = appState.settings.email;
+            if (!email) {
+                alert('Please configure your email in Settings first');
+                document.querySelector('[data-tab="settings"]').click();
+                return;
+            }
+            
+            const job = appState.selectedJob;
+            const resume = document.getElementById('resumePreview').textContent;
+            const coverLetter = document.getElementById('coverLetterPreview').textContent;
+            
+            // Create mailto link
+            const subject = `Application for ${job.title} at ${job.company}`;
+            const body = `${coverLetter}\n\n---\n\nRESUME:\n${resume}`;
+            
+            const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            
+            // Track application
+            appState.applications.push({
+                id: Date.now(),
+                jobId: job.id,
+                appliedDate: new Date().toISOString(),
+                status: 'applied',
+                notes: ''
+            });
+            
+            saveState();
+            renderApplications();
+            
+            // Open email client
+            window.location.href = mailtoLink;
+            
+            alert('Application tracked! Your email client should open with the pre-filled application.');
+        }
+        
+        // Download resume
+        function downloadResume() {
+            const resume = document.getElementById('resumePreview').textContent;
+            const blob = new Blob([resume], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `resume-${appState.selectedJob.company}-${Date.now()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // Render applications
+        function renderApplications() {
+            const appList = document.getElementById('applicationsList');
+            const apps = appState.applications;
+            
+            if (apps.length === 0) {
+                appList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p>No applications yet. Start applying to jobs!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            appList.innerHTML = apps.map(app => {
+                const job = appState.jobs.find(j => j.id === app.jobId);
+                if (!job) return '';
+                
+                return `
+                    <div class="card">
+                        <div class="job-header">
+                            <div>
+                                <h3 class="job-title">${job.title}</h3>
+                                <p class="company-name">${job.company}</p>
+                                <p style="color: var(--gray-600); font-size: 0.875rem;">
+                                    Applied: ${new Date(app.appliedDate).toLocaleDateString()}
+                                </p>
+                            </div>
+                            <span class="status-badge status-${app.status}">${app.status}</span>
+                        </div>
+                        <div class="job-actions">
+                            <select class="form-input" style="width: auto;" onchange="updateApplicationStatus(${app.id}, this.value)">
+                                <option value="applied" ${app.status === 'applied' ? 'selected' : ''}>Applied</option>
+                                <option value="interview" ${app.status === 'interview' ? 'selected' : ''}>Interview</option>
+                                <option value="offer" ${app.status === 'offer' ? 'selected' : ''}>Offer</option>
+                                <option value="rejected" ${app.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                            </select>
+                            <button class="btn btn-secondary" onclick="addApplicationNote(${app.id})">
+                                📝 Add Note
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Update application status
+        function updateApplicationStatus(appId, status) {
+            const app = appState.applications.find(a => a.id === appId);
+            if (app) {
+                app.status = status;
+                saveState();
+                renderApplications();
+                renderJobs();
+            }
+        }
+        
+        // Save settings
+        function saveSettings() {
+            appState.settings.email = document.getElementById('emailAddress').value;
+            appState.settings.emailTemplate = document.getElementById('emailTemplate').value;
+            saveState();
+            alert('Settings saved!');
+        }
+        
+        // Load settings
+        function loadSettings() {
+            document.getElementById('emailAddress').value = appState.settings.email || '';
+            document.getElementById('emailTemplate').value = appState.settings.emailTemplate || '';
+        }
+        
+        // Close modal
+        function closeModal() {
+            document.getElementById('applicationModal').classList.remove('active');
+        }
+        
+        // Handle application form submission
+        document.getElementById('applicationForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const job = appState.selectedJob;
+            const coverLetter = document.getElementById('coverLetter').value;
+            const notes = document.getElementById('applicationNotes').value;
+            
+            appState.applications.push({
+                id: Date.now(),
+                jobId: job.id,
+                appliedDate: new Date().toISOString(),
+                status: 'applied',
+                coverLetter: coverLetter,
+                notes: notes
+            });
+            
+            saveState();
+            renderApplications();
+            renderJobs();
+            closeModal();
+            
+            alert('Application submitted and tracked!');
+        });
+        
+        // Filter chips functionality
+        document.querySelectorAll('.filter-chips .chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                // Remove active from siblings
+                chip.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                
+                // Apply filter logic here
+                // For demo, we're just showing visual feedback
+            });
+        });
+        
+        // Search functionality
+        document.querySelector('.search-box').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            // Implement search logic here
+            console.log('Searching for:', query);
+        });
+        
+        // Initialize app
+        function initApp() {
+            loadState();
+            initializeJobs();
+            renderApplications();
+            loadSettings();
+        }
+        
+        // Update UI
+        function updateUI() {
+            renderJobs();
+            renderApplications();
+            loadSettings();
+        }
+        
+        // Start the app
+        initApp();
+        
+        // Auto-save every 30 seconds
+        setInterval(saveState, 30000);
+    </script>
+</body>
+</html>

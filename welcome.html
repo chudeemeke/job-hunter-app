@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Install Job Hunter Pro - Your Personal Career Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+            padding: 40px 30px;
+            text-align: center;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .app-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #1a202c;
+        }
+        
+        .subtitle {
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .install-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .install-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+        
+        .install-btn:active {
+            transform: translateY(0);
+        }
+        
+        .install-btn.hidden {
+            display: none;
+        }
+        
+        .enter-btn {
+            background: #48bb78;
+            margin-top: 10px;
+        }
+        
+        .instructions {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+            display: none;
+        }
+        
+        .instructions.show {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .instructions h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            color: #4a5568;
+        }
+        
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+        
+        .step-text {
+            line-height: 1.5;
+            font-size: 15px;
+        }
+        
+        .device-icon {
+            font-size: 20px;
+            margin-right: 8px;
+        }
+        
+        .success-message {
+            background: #c6f6d5;
+            color: #276749;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .success-message.show {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .features {
+            text-align: left;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .features h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #4a5568;
+        }
+        
+        .feature-icon {
+            font-size: 24px;
+            margin-right: 12px;
+        }
+        
+        .not-supported {
+            background: #fed7d7;
+            color: #742a2a;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .not-supported.show {
+            display: block;
+        }
+        
+        /* Loading animation */
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .install-btn {
+                font-size: 16px;
+                padding: 16px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="app-icon">💼</div>
+        
+        <h1>Job Hunter Pro</h1>
+        <p class="subtitle">Your AI-powered career assistant</p>
+        
+        <button id="installBtn" class="install-btn" onclick="installApp()">
+            Install Job Hunter Pro
+        </button>
+        
+        <button id="enterBtn" class="install-btn enter-btn hidden" onclick="enterApp()">
+            Open Job Hunter Pro
+        </button>
+        
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px; color: #718096;">Preparing installation...</p>
+        </div>
+        
+        <div id="iosInstructions" class="instructions">
+            <h3><span class="device-icon">📱</span>Install on iPhone/iPad</h3>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-text">Tap the <strong>Share</strong> button (square with arrow pointing up)</div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-text">Scroll down and tap <strong>"Add to Home Screen"</strong></div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-text">Tap <strong>"Add"</strong> in the top right corner</div>
+            </div>
+            <div class="step">
+                <div class="step-number">✓</div>
+                <div class="step-text">Open from your home screen!</div>
+            </div>
+        </div>
+        
+        <div id="androidInstructions" class="instructions">
+            <h3><span class="device-icon">🤖</span>Install on Android</h3>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-text">Tap the <strong>Menu</strong> button (3 dots) in the top right</div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-text">Tap <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong></div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-text">Tap <strong>"Install"</strong> when prompted</div>
+            </div>
+            <div class="step">
+                <div class="step-number">✓</div>
+                <div class="step-text">Open from your home screen!</div>
+            </div>
+        </div>
+        
+        <div id="desktopInstructions" class="instructions">
+            <h3><span class="device-icon">💻</span>Install on Computer</h3>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-text">Look for the <strong>Install</strong> icon in your browser's address bar</div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-text">Click <strong>"Install"</strong> when prompted</div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-text">The app will open in its own window</div>
+            </div>
+            <div class="step">
+                <div class="step-number">✓</div>
+                <div class="step-text">Access from your desktop or start menu!</div>
+            </div>
+        </div>
+        
+        <div id="successMessage" class="success-message">
+            <strong>🎉 Success!</strong> Job Hunter Pro has been installed. You can now open it from your home screen!
+        </div>
+        
+        <div id="notSupported" class="not-supported">
+            <strong>⚠️ Browser Not Supported</strong><br>
+            Please use Safari on iPhone/iPad or Chrome on Android/Desktop for the best experience.
+        </div>
+        
+        <div class="features">
+            <h3>What You'll Get</h3>
+            <div class="feature">
+                <span class="feature-icon">🤖</span>
+                <span>AI-powered resume optimization</span>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">📊</span>
+                <span>Track all your job applications</span>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">🔍</span>
+                <span>Smart job search & filtering</span>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">📱</span>
+                <span>Works offline once installed</span>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">🔒</span>
+                <span>Your data stays private & secure</span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let deferredPrompt;
+        let isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+        let isAndroid = /Android/.test(navigator.userAgent);
+        let isMobile = isIOS || isAndroid;
+        let isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                    window.navigator.standalone || 
+                    document.referrer.includes('android-app://');
+        
+        // Check if already installed
+        if (isPWA) {
+            document.getElementById('installBtn').classList.add('hidden');
+            document.getElementById('enterBtn').classList.remove('hidden');
+        }
+        
+        // Listen for install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install button
+            document.getElementById('installBtn').style.display = 'block';
+        });
+        
+        // Install app
+        async function installApp() {
+            const btn = document.getElementById('installBtn');
+            const loading = document.getElementById('loading');
+            
+            if (deferredPrompt) {
+                // Show loading
+                btn.style.display = 'none';
+                loading.classList.add('show');
+                
+                // Show install prompt
+                deferredPrompt.prompt();
+                
+                const { outcome } = await deferredPrompt.userChoice;
+                
+                loading.classList.remove('show');
+                
+                if (outcome === 'accepted') {
+                    // Show success
+                    document.getElementById('successMessage').classList.add('show');
+                    document.getElementById('enterBtn').classList.remove('hidden');
+                } else {
+                    btn.style.display = 'block';
+                }
+                
+                deferredPrompt = null;
+            } else {
+                // Show manual instructions
+                if (isIOS) {
+                    // iOS requires Safari
+                    if (!navigator.userAgent.includes('Safari') || navigator.userAgent.includes('CriOS') || navigator.userAgent.includes('FxiOS')) {
+                        alert('Please open this page in Safari to install the app on your iPhone/iPad');
+                        return;
+                    }
+                    document.getElementById('iosInstructions').classList.add('show');
+                } else if (isAndroid) {
+                    document.getElementById('androidInstructions').classList.add('show');
+                } else {
+                    document.getElementById('desktopInstructions').classList.add('show');
+                }
+                
+                // Hide install button after showing instructions
+                btn.textContent = 'Follow the instructions above ☝️';
+                btn.style.background = '#718096';
+                btn.style.cursor = 'default';
+                btn.onclick = null;
+            }
+        }
+        
+        // Enter app
+        function enterApp() {
+            window.location.href = '/index.html';
+        }
+        
+        // Check if app was installed
+        window.addEventListener('appinstalled', () => {
+            console.log('App installed successfully!');
+            document.getElementById('successMessage').classList.add('show');
+            document.getElementById('installBtn').classList.add('hidden');
+            document.getElementById('enterBtn').classList.remove('hidden');
+        });
+        
+        // Auto-detect and show instructions for iOS Safari
+        if (isIOS && !isPWA) {
+            // Check if it's Safari
+            const isSafari = navigator.userAgent.includes('Safari') && 
+                           !navigator.userAgent.includes('CriOS') && 
+                           !navigator.userAgent.includes('FxiOS');
+            
+            if (!isSafari) {
+                setTimeout(() => {
+                    document.getElementById('notSupported').classList.add('show');
+                }, 1000);
+            }
+        }
+        
+        // Make sure service worker is registered
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').then(registration => {
+                console.log('ServiceWorker registered');
+            }).catch(err => {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+        }
+    </script>
+</body>
+</html>
