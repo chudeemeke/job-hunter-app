@@ -209,3 +209,8 @@ MIT License - Feel free to modify and use for your job search!
 - Improved service worker caching
 - Added version checking system
 - Enhanced offline capabilities
+## 🤖 CI/CD Auto-Fix
+
+This repository uses Claude AI to automatically fix CI/CD failures.
+If builds fail, Claude will automatically create a fix PR.
+
